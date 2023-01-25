@@ -1,9 +1,11 @@
-
+from itertools import combinations
 import numpy as np
 import os
-
-def load_mat():
-    pass
+import re
+import time
+import matplotlib.pyplot as plt
+def load_mat(file):
+    return np.loadtxt(file, skiprows = 1)
 
 def mat_mul(A,B):
     """
@@ -58,22 +60,66 @@ def mat_mul_Strassen(A,B, seuil = 1):
     return C
 
 
+
+
+
 if __name__ == '__main__':
-
+    Taille = []
+    Time_mul = []
+    Time_Strassen = []
     folder = './'
-
+    dico_matrice = {} # dictionnaire des différents chemins des fichiers en fonction de la taille de la matrice contenue
     for filename in os.listdir(folder):
         filepath = os.path.join(folder, filename)
-        if os.path.isfile(filepath):
-            if "ex" in filename :
-                pass
 
-    A = np.array([[1,8,5,6],[4,2,5,9],[8,2,4,6],[7,2,4,1]])
-    B = np.array([[1,2],[3,4]])
-    n = int(np.shape(A)[0])
-    m = int(n/2)
-    C = mat_mul(A,A)
-    print(C)
-    print(mat_mul_Strassen(A,A))
+        if 'ex' in filename:
+            filepath = os.path.join(folder, filename)
+            match = re.search(r'\d+', filename)
+            nb = int(match.group())
+            dico_matrice.setdefault(nb,[]).append(filename)
 
+    for key,value in dico_matrice.items(): # Pour chaque taille de matrice, on fait la moyenne du temps de calcul sur toutes les combinaisons
+        combinations_list = list(combinations(value, 2)) # liste des combinaisons de 2 matrices
+        Taille.append(key)
+        t_mul = []
+        t_strassen = []
+        for c in combinations_list:
+            print(c)
+            A = load_mat(c[0])
+            B = load_mat(c[1])
+
+            begin_mul = time.time()
+            res = mat_mul(A,B)
+            end_mul = time.time()
+            t_mul.append(end_mul - begin_mul)
+
+            begin_strassen = time.time()
+            res = mat_mul_Strassen(A, B)
+            end_strassen = time.time()
+            t_strassen.append(end_strassen - begin_strassen)
+        Time_mul.append(sum(t_mul)/len(t_mul))
+        Time_Strassen.append(sum(t_strassen)/len(t_strassen))
+    plt.plot(Taille, Time_mul)
+    plt.plot(Taille, Time_Strassen)
+    plt.show()
+    print(Taille)
+    print(Time_mul)
+    print(Time_Strassen)
+
+
+    
+
+
+
+
+
+
+    # A = np.array([[1,8,5,6],[4,2,5,9],[8,2,4,6],[7,2,4,1]])
+    # B = np.array([[1,2],[3,4]])
+    # n = int(np.shape(A)[0])
+    # m = int(n/2)
+    # C = mat_mul(A,A)
+    # print(C)
+    # print(mat_mul_Strassen(A,A))
+    #
 
