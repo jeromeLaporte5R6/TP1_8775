@@ -4,6 +4,7 @@ import os
 import re
 import time
 import matplotlib.pyplot as plt
+
 def load_mat(file):
     return np.loadtxt(file, skiprows = 1)
 
@@ -32,8 +33,8 @@ def mat_mul_Strassen(A,B, seuil = 1):
     """
     n = np.shape(A)[0]
     C = np.zeros((n,n))
-    if n == seuil:
-        C[0,0] = A[0,0]*B[0,0]
+    if int(np.log(n)) == seuil:
+        C = mat_mul(A,B)
     else :
         m = int(n/2)
         A11 = A[:m,:m]
@@ -77,6 +78,7 @@ if __name__ == '__main__':
             match = re.search(r'\d+', filename)
             nb = int(match.group())
             dico_matrice.setdefault(nb,[]).append(filename)
+    print(dico_matrice)
 
     for key,value in dico_matrice.items(): # Pour chaque taille de matrice, on fait la moyenne du temps de calcul sur toutes les combinaisons
         combinations_list = list(combinations(value, 2)) # liste des combinaisons de 2 matrices
